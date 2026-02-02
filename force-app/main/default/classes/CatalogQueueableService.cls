@@ -1,16 +1,16 @@
-public class CatalogQueueableService implements Queueable, Database.AllowsCallouts {
+public class CatalogQueueableService implements Queueable, Database.AllowsCallouts
+{
 
     private List<Product2> products;
-
-    // Constructor
-    public CatalogQueueableService(List<Product2> products) {
+    public CatalogQueueableService(List<Product2> products) 
+{
         this.products = products;
     }
+    public void execute(QueueableContext context)
+{
 
-    // Queueable entry point
-    public void execute(QueueableContext context) {
-
-        for (Product2 prod : products) {
+        for (Product2 prod : products) 
+{
             callCatalogAPI(prod);
         }
     }
@@ -44,13 +44,10 @@ public class CatalogQueueableService implements Queueable, Database.AllowsCallou
                     (Map<String, Object>) JSON.deserializeUntyped(res.getBody());
 
                 String catalogId = (String) responseMap.get('catalogId');
-
-                update new Product2(
-                    Id = prod.Id,
-                    Catalog_Id__c = catalogId
-                );
-
-            } else {
+                update new Product2(Id = prod.Id,Catalog_Id__c = catalogId );
+            } 
+              else
+            {
                 logError(prod.Id, res.getStatusCode(), res.getBody());
             }
 
@@ -59,12 +56,9 @@ public class CatalogQueueableService implements Queueable, Database.AllowsCallou
         }
     }
 
-    private void logError(Id productId, Integer statusCode, String message) {
+    private void logError(Id productId, Integer statusCode, String message)
+{
 
-        insert new API_Log__c(
-            Product__c = productId,
-            Status_Code__c = statusCode,
-            Message__c = message
-        );
+        insert new API_Log__c( Product__c = productId,Status_Code__c = statusCode, Message__c = message);
     }
 }
