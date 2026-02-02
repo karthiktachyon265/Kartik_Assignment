@@ -1,8 +1,6 @@
-trigger ProductActiveCountTrigger on Product2 (
-    after insert, after update, after delete
-) {
+trigger ProductActiveCountTrigger on Product2 (after insert, after update, after delete)
+{
     Set<Id> catIds = new Set<Id>();
-
     if(Trigger.isInsert || Trigger.isUpdate)
     {
         for(Product2 p : Trigger.new)
