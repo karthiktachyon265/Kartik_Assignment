@@ -1,21 +1,13 @@
-public class CatalogCalloutService {
-
+public class CatalogCalloutService 
+{
     @future(callout=true)
-    public static void sendProducts(List<Id> productIds) {
-
-        // Re-query products (Future limitation)
-        List<Product2> products = [
-            SELECT Id, Name, ProductCode, List_Price__c
-            FROM Product2
-            WHERE Id IN :productIds
-        ];
-
+    public static void sendProducts(List<Id> productIds)
+{
+        List<Product2> products = [SELECT Id, Name, ProductCode, List_Price__c FROM Product2 WHERE Id IN :productIds];
         Http http = new Http();
-
-        for (Product2 prod : products) {
-
+        for (Product2 prod : products) 
+{
             try {
-                // Prepare request
                 HttpRequest req = new HttpRequest();
                 req.setEndpoint('https://mock-catalog-api.com/products');
                 req.setMethod('POST');
@@ -29,40 +21,23 @@ public class CatalogCalloutService {
                 };
 
                 req.setBody(JSON.serialize(body));
-
-                // Send callout
                 HttpResponse res = http.send(req);
+                if (res.getStatusCode() == 200) 
+{
 
-                // Handle success
-                if (res.getStatusCode() == 200) {
-
-                    Map<String, Object> responseMap =
-                        (Map<String, Object>) JSON.deserializeUntyped(res.getBody());
-
+                    Map<String, Object> responseMap = (Map<String, Object>) JSON.deserializeUntyped(res.getBody());
                     String catalogId = (String) responseMap.get('catalogId');
 
-                    update new Product2(
-                        Id = prod.Id,
-                        Catalog_Id__c = catalogId
-                    );
-
+                    update new Product2(Id = prod.Id,Catalog_Id__c = catalogId);
                 } 
-                // Handle non-200 response
-                else {
-                    insert new API_Log__c(
-                        Product__c = prod.Id,
-                        Status_Code__c = res.getStatusCode(),
-                        Message__c = res.getBody()
-                    );
+                else
+{
+                    insert new API_Log__c( Product__c = prod.Id,Status_Code__c = res.getStatusCode(),Message__c = res.getBody());
                 }
 
-            } catch (Exception e) {
-                // Handle exception (timeouts, failures)
-                insert new API_Log__c(
-                    Product__c = prod.Id,
-                    Status_Code__c = 500,
-                    Message__c = e.getMessage()
-                );
+            } catch (Exception e) 
+{
+                insert new API_Log__c(Product__c = prod.Id,Status_Code__c = 500,Message__c = e.getMessage());
             }
         }
     }
